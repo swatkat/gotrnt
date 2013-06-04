@@ -95,11 +95,11 @@ func (peerInfo *PeerInfo) recvMsgs(sessionInfo *TrntSessionInfo) {
 	for {
 		// Read length of the message
 		var msglenbuf [4]byte
-		if _, er := io.ReadFull(peerInfo.Conn, msglenbuf); er != nil {
+		if _, er := io.ReadFull(peerInfo.Conn, msglenbuf[0:]); er != nil {
 			log.Println(DebugGetFuncName(), er)
 			break
 		}
-		msglen := getUint32FromBytes(msglenbuf)
+		msglen := getUint32FromBytes(msglenbuf[0:])
 		if msglen <= 0 {
 			log.Println(DebugGetFuncName(), "Invalid msg len, peer:",
 				peerInfo.Addr)
@@ -114,7 +114,7 @@ func (peerInfo *PeerInfo) recvMsgs(sessionInfo *TrntSessionInfo) {
 		}
 
 		// Prefix msg len to the read message, and decode it
-		copy(buf[0:4], msglenbuf)
+		copy(buf[0:4], msglenbuf[0:])
 		msgData, ok = gotrntmessages.DecodeMessage(buf)
 
 		// Process message and take action
